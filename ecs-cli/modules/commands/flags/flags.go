@@ -121,11 +121,16 @@ const (
 	RegistryCredsFileNameFlag = "registry-creds"
 
 	// Compose Service
-	CreateServiceCommandName                = "create"
-	DeploymentMaxPercentDefaultValue        = 200
-	DeploymentMaxPercentFlag                = "deployment-max-percent"
-	DeploymentMinHealthyPercentDefaultValue = 100
-	DeploymentMinHealthyPercentFlag         = "deployment-min-healthy-percent"
+	CreateServiceCommandName                		= "create"
+	DeploymentMaxPercentDefaultValue        		= 200
+	DeploymentMaxPercentFlag                		= "deployment-max-percent"
+	DeploymentMinHealthyPercentDefaultValue 		= 100
+	DeploymentMinHealthyPercentFlag         		= "deployment-min-healthy-percent"
+	DeploymentCircuitBreakerEnableFlag				= "deployment-circuit-breaker-enable"
+	DeploymentCircuitBreakerEnableDefaultValue		= false
+	DeploymentCircuitBreakerRollbackFlag			= "deployment-circuit-breaker-rollback"
+	DeploymentCircuitBreakerRollbackDefaultValue	= false
+
 	TargetGroupArnFlag                      = "target-group-arn"
 	ContainerNameFlag                       = "container-name"
 	ContainerPortFlag                       = "container-port"

@@ -255,6 +255,9 @@ func (c *CloudFormation) CreateChangeSetRequest(input *CreateChangeSetInput) (re
 // the change set by using the ExecuteChangeSet action. AWS CloudFormation doesn't
 // make changes until you execute the change set.
 //
+// To create a change set for the entire stack hierachy, set IncludeNestedStacks
+// to True.
+//
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
 // the error.
@@ -632,6 +635,11 @@ func (c *CloudFormation) DeleteChangeSetRequest(input *DeleteChangeSetInput) (re
 //
 // If the call successfully completes, AWS CloudFormation successfully deleted
 // the change set.
+//
+// If IncludeNestedStacks specifies True during the creation of the nested change
+// set, then DeleteChangeSet will delete all change sets that belong to the
+// stacks hierarchy and will also delete all change sets for nested stacks with
+// the status of REVIEW_IN_PROGRESS.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -1055,6 +1063,12 @@ func (c *CloudFormation) DescribeAccountLimitsRequest(input *DescribeAccountLimi
 		Name:       opDescribeAccountLimits,
 		HTTPMethod: "POST",
 		HTTPPath:   "/",
+		Paginator: &request.Paginator{
+			InputTokens:     []string{"NextToken"},
+			OutputTokens:    []string{"NextToken"},
+			LimitToken:      "",
+			TruncationToken: "",
+		},
 	}
 
 	if input == nil {
@@ -1099,6 +1113,58 @@ func (c *CloudFormation) DescribeAccountLimitsWithContext(ctx aws.Context, input
 	req.SetContext(ctx)
 	req.ApplyOptions(opts...)
 	return out, req.Send()
+}
+
+// DescribeAccountLimitsPages iterates over the pages of a DescribeAccountLimits operation,
+// calling the "fn" function with the response data for each page. To stop
+// iterating, return false from the fn function.
+//
+// See DescribeAccountLimits method for more information on how to use this operation.
+//
+// Note: This operation can generate multiple requests to a service.
+//
+//    // Example iterating over at most 3 pages of a DescribeAccountLimits operation.
+//    pageNum := 0
+//    err := client.DescribeAccountLimitsPages(params,
+//        func(page *cloudformation.DescribeAccountLimitsOutput, lastPage bool) bool {
+//            pageNum++
+//            fmt.Println(page)
+//            return pageNum <= 3
+//        })
+//
+func (c *CloudFormation) DescribeAccountLimitsPages(input *DescribeAccountLimitsInput, fn func(*DescribeAccountLimitsOutput, bool) bool) error {
+	return c.DescribeAccountLimitsPagesWithContext(aws.BackgroundContext(), input, fn)
+}
+
+// DescribeAccountLimitsPagesWithContext same as DescribeAccountLimitsPages except
+// it takes a Context and allows setting request options on the pages.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *CloudFormation) DescribeAccountLimitsPagesWithContext(ctx aws.Context, input *DescribeAccountLimitsInput, fn func(*DescribeAccountLimitsOutput, bool) bool, opts ...request.Option) error {
+	p := request.Pagination{
+		NewRequest: func() (*request.Request, error) {
+			var inCpy *DescribeAccountLimitsInput
+			if input != nil {
+				tmp := *input
+				inCpy = &tmp
+			}
+			req, _ := c.DescribeAccountLimitsRequest(inCpy)
+			req.SetContext(ctx)
+			req.ApplyOptions(opts...)
+			return req, nil
+		},
+	}
+
+	for p.Next() {
+		if !fn(p.Page().(*DescribeAccountLimitsOutput), !p.HasNextPage()) {
+			break
+		}
+	}
+
+	return p.Err()
 }
 
 const opDescribeChangeSet = "DescribeChangeSet"
@@ -2710,6 +2776,9 @@ func (c *CloudFormation) ExecuteChangeSetRequest(input *ExecuteChangeSetInput) (
 // the policy during the update. You can't specify a temporary stack policy
 // that overrides the current policy.
 //
+// To create a change set for the entire stack hierachy, IncludeNestedStacks
+// must have been set to True.
+//
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
 // the error.
@@ -3038,6 +3107,12 @@ func (c *CloudFormation) ListChangeSetsRequest(input *ListChangeSetsInput) (req 
 		Name:       opListChangeSets,
 		HTTPMethod: "POST",
 		HTTPPath:   "/",
+		Paginator: &request.Paginator{
+			InputTokens:     []string{"NextToken"},
+			OutputTokens:    []string{"NextToken"},
+			LimitToken:      "",
+			TruncationToken: "",
+		},
 	}
 
 	if input == nil {
@@ -3081,6 +3156,58 @@ func (c *CloudFormation) ListChangeSetsWithContext(ctx aws.Context, input *ListC
 	req.SetContext(ctx)
 	req.ApplyOptions(opts...)
 	return out, req.Send()
+}
+
+// ListChangeSetsPages iterates over the pages of a ListChangeSets operation,
+// calling the "fn" function with the response data for each page. To stop
+// iterating, return false from the fn function.
+//
+// See ListChangeSets method for more information on how to use this operation.
+//
+// Note: This operation can generate multiple requests to a service.
+//
+//    // Example iterating over at most 3 pages of a ListChangeSets operation.
+//    pageNum := 0
+//    err := client.ListChangeSetsPages(params,
+//        func(page *cloudformation.ListChangeSetsOutput, lastPage bool) bool {
+//            pageNum++
+//            fmt.Println(page)
+//            return pageNum <= 3
+//        })
+//
+func (c *CloudFormation) ListChangeSetsPages(input *ListChangeSetsInput, fn func(*ListChangeSetsOutput, bool) bool) error {
+	return c.ListChangeSetsPagesWithContext(aws.BackgroundContext(), input, fn)
+}
+
+// ListChangeSetsPagesWithContext same as ListChangeSetsPages except
+// it takes a Context and allows setting request options on the pages.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *CloudFormation) ListChangeSetsPagesWithContext(ctx aws.Context, input *ListChangeSetsInput, fn func(*ListChangeSetsOutput, bool) bool, opts ...request.Option) error {
+	p := request.Pagination{
+		NewRequest: func() (*request.Request, error) {
+			var inCpy *ListChangeSetsInput
+			if input != nil {
+				tmp := *input
+				inCpy = &tmp
+			}
+			req, _ := c.ListChangeSetsRequest(inCpy)
+			req.SetContext(ctx)
+			req.ApplyOptions(opts...)
+			return req, nil
+		},
+	}
+
+	for p.Next() {
+		if !fn(p.Page().(*ListChangeSetsOutput), !p.HasNextPage()) {
+			break
+		}
+	}
+
+	return p.Err()
 }
 
 const opListExports = "ListExports"
@@ -3389,6 +3516,12 @@ func (c *CloudFormation) ListStackInstancesRequest(input *ListStackInstancesInpu
 		Name:       opListStackInstances,
 		HTTPMethod: "POST",
 		HTTPPath:   "/",
+		Paginator: &request.Paginator{
+			InputTokens:     []string{"NextToken"},
+			OutputTokens:    []string{"NextToken"},
+			LimitToken:      "MaxResults",
+			TruncationToken: "",
+		},
 	}
 
 	if input == nil {
@@ -3404,7 +3537,7 @@ func (c *CloudFormation) ListStackInstancesRequest(input *ListStackInstancesInpu
 //
 // Returns summary information about stack instances that are associated with
 // the specified stack set. You can filter for stack instances that are associated
-// with a specific AWS account name or Region.
+// with a specific AWS account name or Region, or that have a specific status.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -3437,6 +3570,58 @@ func (c *CloudFormation) ListStackInstancesWithContext(ctx aws.Context, input *L
 	req.SetContext(ctx)
 	req.ApplyOptions(opts...)
 	return out, req.Send()
+}
+
+// ListStackInstancesPages iterates over the pages of a ListStackInstances operation,
+// calling the "fn" function with the response data for each page. To stop
+// iterating, return false from the fn function.
+//
+// See ListStackInstances method for more information on how to use this operation.
+//
+// Note: This operation can generate multiple requests to a service.
+//
+//    // Example iterating over at most 3 pages of a ListStackInstances operation.
+//    pageNum := 0
+//    err := client.ListStackInstancesPages(params,
+//        func(page *cloudformation.ListStackInstancesOutput, lastPage bool) bool {
+//            pageNum++
+//            fmt.Println(page)
+//            return pageNum <= 3
+//        })
+//
+func (c *CloudFormation) ListStackInstancesPages(input *ListStackInstancesInput, fn func(*ListStackInstancesOutput, bool) bool) error {
+	return c.ListStackInstancesPagesWithContext(aws.BackgroundContext(), input, fn)
+}
+
+// ListStackInstancesPagesWithContext same as ListStackInstancesPages except
+// it takes a Context and allows setting request options on the pages.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *CloudFormation) ListStackInstancesPagesWithContext(ctx aws.Context, input *ListStackInstancesInput, fn func(*ListStackInstancesOutput, bool) bool, opts ...request.Option) error {
+	p := request.Pagination{
+		NewRequest: func() (*request.Request, error) {
+			var inCpy *ListStackInstancesInput
+			if input != nil {
+				tmp := *input
+				inCpy = &tmp
+			}
+			req, _ := c.ListStackInstancesRequest(inCpy)
+			req.SetContext(ctx)
+			req.ApplyOptions(opts...)
+			return req, nil
+		},
+	}
+
+	for p.Next() {
+		if !fn(p.Page().(*ListStackInstancesOutput), !p.HasNextPage()) {
+			break
+		}
+	}
+
+	return p.Err()
 }
 
 const opListStackResources = "ListStackResources"
@@ -3605,6 +3790,12 @@ func (c *CloudFormation) ListStackSetOperationResultsRequest(input *ListStackSet
 		Name:       opListStackSetOperationResults,
 		HTTPMethod: "POST",
 		HTTPPath:   "/",
+		Paginator: &request.Paginator{
+			InputTokens:     []string{"NextToken"},
+			OutputTokens:    []string{"NextToken"},
+			LimitToken:      "MaxResults",
+			TruncationToken: "",
+		},
 	}
 
 	if input == nil {
@@ -3656,6 +3847,58 @@ func (c *CloudFormation) ListStackSetOperationResultsWithContext(ctx aws.Context
 	return out, req.Send()
 }
 
+// ListStackSetOperationResultsPages iterates over the pages of a ListStackSetOperationResults operation,
+// calling the "fn" function with the response data for each page. To stop
+// iterating, return false from the fn function.
+//
+// See ListStackSetOperationResults method for more information on how to use this operation.
+//
+// Note: This operation can generate multiple requests to a service.
+//
+//    // Example iterating over at most 3 pages of a ListStackSetOperationResults operation.
+//    pageNum := 0
+//    err := client.ListStackSetOperationResultsPages(params,
+//        func(page *cloudformation.ListStackSetOperationResultsOutput, lastPage bool) bool {
+//            pageNum++
+//            fmt.Println(page)
+//            return pageNum <= 3
+//        })
+//
+func (c *CloudFormation) ListStackSetOperationResultsPages(input *ListStackSetOperationResultsInput, fn func(*ListStackSetOperationResultsOutput, bool) bool) error {
+	return c.ListStackSetOperationResultsPagesWithContext(aws.BackgroundContext(), input, fn)
+}
+
+// ListStackSetOperationResultsPagesWithContext same as ListStackSetOperationResultsPages except
+// it takes a Context and allows setting request options on the pages.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *CloudFormation) ListStackSetOperationResultsPagesWithContext(ctx aws.Context, input *ListStackSetOperationResultsInput, fn func(*ListStackSetOperationResultsOutput, bool) bool, opts ...request.Option) error {
+	p := request.Pagination{
+		NewRequest: func() (*request.Request, error) {
+			var inCpy *ListStackSetOperationResultsInput
+			if input != nil {
+				tmp := *input
+				inCpy = &tmp
+			}
+			req, _ := c.ListStackSetOperationResultsRequest(inCpy)
+			req.SetContext(ctx)
+			req.ApplyOptions(opts...)
+			return req, nil
+		},
+	}
+
+	for p.Next() {
+		if !fn(p.Page().(*ListStackSetOperationResultsOutput), !p.HasNextPage()) {
+			break
+		}
+	}
+
+	return p.Err()
+}
+
 const opListStackSetOperations = "ListStackSetOperations"
 
 // ListStackSetOperationsRequest generates a "aws/request.Request" representing the
@@ -3687,6 +3930,12 @@ func (c *CloudFormation) ListStackSetOperationsRequest(input *ListStackSetOperat
 		Name:       opListStackSetOperations,
 		HTTPMethod: "POST",
 		HTTPPath:   "/",
+		Paginator: &request.Paginator{
+			InputTokens:     []string{"NextToken"},
+			OutputTokens:    []string{"NextToken"},
+			LimitToken:      "MaxResults",
+			TruncationToken: "",
+		},
 	}
 
 	if input == nil {
@@ -3735,6 +3984,58 @@ func (c *CloudFormation) ListStackSetOperationsWithContext(ctx aws.Context, inpu
 	return out, req.Send()
 }
 
+// ListStackSetOperationsPages iterates over the pages of a ListStackSetOperations operation,
+// calling the "fn" function with the response data for each page. To stop
+// iterating, return false from the fn function.
+//
+// See ListStackSetOperations method for more information on how to use this operation.
+//
+// Note: This operation can generate multiple requests to a service.
+//
+//    // Example iterating over at most 3 pages of a ListStackSetOperations operation.
+//    pageNum := 0
+//    err := client.ListStackSetOperationsPages(params,
+//        func(page *cloudformation.ListStackSetOperationsOutput, lastPage bool) bool {
+//            pageNum++
+//            fmt.Println(page)
+//            return pageNum <= 3
+//        })
+//
+func (c *CloudFormation) ListStackSetOperationsPages(input *ListStackSetOperationsInput, fn func(*ListStackSetOperationsOutput, bool) bool) error {
+	return c.ListStackSetOperationsPagesWithContext(aws.BackgroundContext(), input, fn)
+}
+
+// ListStackSetOperationsPagesWithContext same as ListStackSetOperationsPages except
+// it takes a Context and allows setting request options on the pages.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *CloudFormation) ListStackSetOperationsPagesWithContext(ctx aws.Context, input *ListStackSetOperationsInput, fn func(*ListStackSetOperationsOutput, bool) bool, opts ...request.Option) error {
+	p := request.Pagination{
+		NewRequest: func() (*request.Request, error) {
+			var inCpy *ListStackSetOperationsInput
+			if input != nil {
+				tmp := *input
+				inCpy = &tmp
+			}
+			req, _ := c.ListStackSetOperationsRequest(inCpy)
+			req.SetContext(ctx)
+			req.ApplyOptions(opts...)
+			return req, nil
+		},
+	}
+
+	for p.Next() {
+		if !fn(p.Page().(*ListStackSetOperationsOutput), !p.HasNextPage()) {
+			break
+		}
+	}
+
+	return p.Err()
+}
+
 const opListStackSets = "ListStackSets"
 
 // ListStackSetsRequest generates a "aws/request.Request" representing the
@@ -3766,6 +4067,12 @@ func (c *CloudFormation) ListStackSetsRequest(input *ListStackSetsInput) (req *r
 		Name:       opListStackSets,
 		HTTPMethod: "POST",
 		HTTPPath:   "/",
+		Paginator: &request.Paginator{
+			InputTokens:     []string{"NextToken"},
+			OutputTokens:    []string{"NextToken"},
+			LimitToken:      "MaxResults",
+			TruncationToken: "",
+		},
 	}
 
 	if input == nil {
@@ -3808,6 +4115,58 @@ func (c *CloudFormation) ListStackSetsWithContext(ctx aws.Context, input *ListSt
 	req.SetContext(ctx)
 	req.ApplyOptions(opts...)
 	return out, req.Send()
+}
+
+// ListStackSetsPages iterates over the pages of a ListStackSets operation,
+// calling the "fn" function with the response data for each page. To stop
+// iterating, return false from the fn function.
+//
+// See ListStackSets method for more information on how to use this operation.
+//
+// Note: This operation can generate multiple requests to a service.
+//
+//    // Example iterating over at most 3 pages of a ListStackSets operation.
+//    pageNum := 0
+//    err := client.ListStackSetsPages(params,
+//        func(page *cloudformation.ListStackSetsOutput, lastPage bool) bool {
+//            pageNum++
+//            fmt.Println(page)
+//            return pageNum <= 3
+//        })
+//
+func (c *CloudFormation) ListStackSetsPages(input *ListStackSetsInput, fn func(*ListStackSetsOutput, bool) bool) error {
+	return c.ListStackSetsPagesWithContext(aws.BackgroundContext(), input, fn)
+}
+
+// ListStackSetsPagesWithContext same as ListStackSetsPages except
+// it takes a Context and allows setting request options on the pages.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *CloudFormation) ListStackSetsPagesWithContext(ctx aws.Context, input *ListStackSetsInput, fn func(*ListStackSetsOutput, bool) bool, opts ...request.Option) error {
+	p := request.Pagination{
+		NewRequest: func() (*request.Request, error) {
+			var inCpy *ListStackSetsInput
+			if input != nil {
+				tmp := *input
+				inCpy = &tmp
+			}
+			req, _ := c.ListStackSetsRequest(inCpy)
+			req.SetContext(ctx)
+			req.ApplyOptions(opts...)
+			return req, nil
+		},
+	}
+
+	for p.Next() {
+		if !fn(p.Page().(*ListStackSetsOutput), !p.HasNextPage()) {
+			break
+		}
+	}
+
+	return p.Err()
 }
 
 const opListStacks = "ListStacks"
@@ -5618,6 +5977,15 @@ type ChangeSetSummary struct {
 	// updated.
 	ExecutionStatus *string `type:"string" enum:"ExecutionStatus"`
 
+	// Specifies the current setting of IncludeNestedStacks for the change set.
+	IncludeNestedStacks *bool `type:"boolean"`
+
+	// The parent change set ID.
+	ParentChangeSetId *string `min:"1" type:"string"`
+
+	// The root change set ID.
+	RootChangeSetId *string `min:"1" type:"string"`
+
 	// The ID of the stack with which the change set is associated.
 	StackId *string `type:"string"`
 
@@ -5670,6 +6038,24 @@ func (s *ChangeSetSummary) SetDescription(v string) *ChangeSetSummary {
 // SetExecutionStatus sets the ExecutionStatus field's value.
 func (s *ChangeSetSummary) SetExecutionStatus(v string) *ChangeSetSummary {
 	s.ExecutionStatus = &v
+	return s
+}
+
+// SetIncludeNestedStacks sets the IncludeNestedStacks field's value.
+func (s *ChangeSetSummary) SetIncludeNestedStacks(v bool) *ChangeSetSummary {
+	s.IncludeNestedStacks = &v
+	return s
+}
+
+// SetParentChangeSetId sets the ParentChangeSetId field's value.
+func (s *ChangeSetSummary) SetParentChangeSetId(v string) *ChangeSetSummary {
+	s.ParentChangeSetId = &v
+	return s
+}
+
+// SetRootChangeSetId sets the RootChangeSetId field's value.
+func (s *ChangeSetSummary) SetRootChangeSetId(v string) *ChangeSetSummary {
+	s.RootChangeSetId = &v
 	return s
 }
 
@@ -5878,12 +6264,12 @@ type CreateChangeSetInput struct {
 	//    and AWS::Serverless (http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-aws-serverless.html)
 	//    transforms, which are macros hosted by AWS CloudFormation. This capacity
 	//    does not apply to creating change sets, and specifying it when creating
-	//    change sets has no effect. Also, change sets do not currently support
-	//    nested stacks. If you want to create a stack from a stack template that
-	//    contains macros and nested stacks, you must create or update the stack
-	//    directly from the template using the CreateStack or UpdateStack action,
-	//    and specifying this capability. For more information on macros, see Using
-	//    AWS CloudFormation Macros to Perform Custom Processing on Templates (http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html).
+	//    change sets has no effect. If you want to create a stack from a stack
+	//    template that contains macros and nested stacks, you must create or update
+	//    the stack directly from the template using the CreateStack or UpdateStack
+	//    action, and specifying this capability. For more information on macros,
+	//    see Using AWS CloudFormation Macros to Perform Custom Processing on Templates
+	//    (http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html).
 	Capabilities []*string `type:"list"`
 
 	// The name of the change set. The name must be unique among all change sets
@@ -5919,6 +6305,11 @@ type CreateChangeSetInput struct {
 
 	// A description to help you identify this change set.
 	Description *string `min:"1" type:"string"`
+
+	// Creates a change set for the all nested stacks specified in the template.
+	// The default behavior of this action is set to False. To include nested sets
+	// in a change set, specify True.
+	IncludeNestedStacks *bool `type:"boolean"`
 
 	// The Amazon Resource Names (ARNs) of Amazon Simple Notification Service (Amazon
 	// SNS) topics that AWS CloudFormation associates with the stack. To remove
@@ -6096,6 +6487,12 @@ func (s *CreateChangeSetInput) SetDescription(v string) *CreateChangeSetInput {
 	return s
 }
 
+// SetIncludeNestedStacks sets the IncludeNestedStacks field's value.
+func (s *CreateChangeSetInput) SetIncludeNestedStacks(v bool) *CreateChangeSetInput {
+	s.IncludeNestedStacks = &v
+	return s
+}
+
 // SetNotificationARNs sets the NotificationARNs field's value.
 func (s *CreateChangeSetInput) SetNotificationARNs(v []*string) *CreateChangeSetInput {
 	s.NotificationARNs = v
@@ -6233,16 +6630,16 @@ type CreateStackInput struct {
 	//    template, without first reviewing the resulting changes in a change set,
 	//    you must acknowledge this capability. This includes the AWS::Include (http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/create-reusable-transform-function-snippets-and-add-to-your-template-with-aws-include-transform.html)
 	//    and AWS::Serverless (http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-aws-serverless.html)
-	//    transforms, which are macros hosted by AWS CloudFormation. Change sets
-	//    do not currently support nested stacks. If you want to create a stack
-	//    from a stack template that contains macros and nested stacks, you must
-	//    create the stack directly from the template using this capability. You
-	//    should only create stacks directly from a stack template that contains
-	//    macros if you know what processing the macro performs. Each macro relies
-	//    on an underlying Lambda service function for processing stack templates.
-	//    Be aware that the Lambda function owner can update the function operation
-	//    without AWS CloudFormation being notified. For more information, see Using
-	//    AWS CloudFormation Macros to Perform Custom Processing on Templates (http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html).
+	//    transforms, which are macros hosted by AWS CloudFormation. If you want
+	//    to create a stack from a stack template that contains macros and nested
+	//    stacks, you must create the stack directly from the template using this
+	//    capability. You should only create stacks directly from a stack template
+	//    that contains macros if you know what processing the macro performs. Each
+	//    macro relies on an underlying Lambda service function for processing stack
+	//    templates. Be aware that the Lambda function owner can update the function
+	//    operation without AWS CloudFormation being notified. For more information,
+	//    see Using AWS CloudFormation Macros to Perform Custom Processing on Templates
+	//    (http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html).
 	Capabilities []*string `type:"list"`
 
 	// A unique identifier for this CreateStack request. Specify this token if you
@@ -7408,9 +7805,9 @@ func (s DeleteStackSetOutput) GoString() string {
 }
 
 // [Service-managed permissions] The AWS Organizations accounts to which StackSets
-// deploys. StackSets does not deploy stack instances to the organization master
-// account, even if the master account is in your organization or in an OU in
-// your organization.
+// deploys. StackSets does not deploy stack instances to the organization management
+// account, even if the organization management account is in your organization
+// or in an OU in your organization.
 //
 // For update operations, you can specify either Accounts or OrganizationalUnitIds.
 // For create and delete operations, specify OrganizationalUnitIds.
@@ -7710,6 +8107,9 @@ type DescribeChangeSetOutput struct {
 	// updated.
 	ExecutionStatus *string `type:"string" enum:"ExecutionStatus"`
 
+	// Verifies if IncludeNestedStacks is set to True.
+	IncludeNestedStacks *bool `type:"boolean"`
+
 	// If the output exceeds 1 MB, a string that identifies the next page of changes.
 	// If there is no additional page, this value is null.
 	NextToken *string `min:"1" type:"string"`
@@ -7724,9 +8124,17 @@ type DescribeChangeSetOutput struct {
 	// data type.
 	Parameters []*Parameter `type:"list"`
 
+	// Specifies the change set ID of the parent change set in the current nested
+	// change set hierarchy.
+	ParentChangeSetId *string `min:"1" type:"string"`
+
 	// The rollback triggers for AWS CloudFormation to monitor during stack creation
 	// and updating operations, and for the specified monitoring period afterwards.
 	RollbackConfiguration *RollbackConfiguration `type:"structure"`
+
+	// Specifies the change set ID of the root change set in the current nested
+	// change set hierarchy.
+	RootChangeSetId *string `min:"1" type:"string"`
 
 	// The ARN of the stack that is associated with the change set.
 	StackId *string `type:"string"`
@@ -7799,6 +8207,12 @@ func (s *DescribeChangeSetOutput) SetExecutionStatus(v string) *DescribeChangeSe
 	return s
 }
 
+// SetIncludeNestedStacks sets the IncludeNestedStacks field's value.
+func (s *DescribeChangeSetOutput) SetIncludeNestedStacks(v bool) *DescribeChangeSetOutput {
+	s.IncludeNestedStacks = &v
+	return s
+}
+
 // SetNextToken sets the NextToken field's value.
 func (s *DescribeChangeSetOutput) SetNextToken(v string) *DescribeChangeSetOutput {
 	s.NextToken = &v
@@ -7817,9 +8231,21 @@ func (s *DescribeChangeSetOutput) SetParameters(v []*Parameter) *DescribeChangeS
 	return s
 }
 
+// SetParentChangeSetId sets the ParentChangeSetId field's value.
+func (s *DescribeChangeSetOutput) SetParentChangeSetId(v string) *DescribeChangeSetOutput {
+	s.ParentChangeSetId = &v
+	return s
+}
+
 // SetRollbackConfiguration sets the RollbackConfiguration field's value.
 func (s *DescribeChangeSetOutput) SetRollbackConfiguration(v *RollbackConfiguration) *DescribeChangeSetOutput {
 	s.RollbackConfiguration = v
+	return s
+}
+
+// SetRootChangeSetId sets the RootChangeSetId field's value.
+func (s *DescribeChangeSetOutput) SetRootChangeSetId(v string) *DescribeChangeSetOutput {
+	s.RootChangeSetId = &v
 	return s
 }
 
@@ -8851,6 +9277,9 @@ type DescribeTypeOutput struct {
 	// role to provide your resource type with the appropriate credentials.
 	ExecutionRoleArn *string `min:"1" type:"string"`
 
+	// Whether the specified type version is set as the default version.
+	IsDefaultVersion *bool `type:"boolean"`
+
 	// When the specified type version was registered.
 	LastUpdated *time.Time `type:"timestamp"`
 
@@ -8949,6 +9378,12 @@ func (s *DescribeTypeOutput) SetDocumentationUrl(v string) *DescribeTypeOutput {
 // SetExecutionRoleArn sets the ExecutionRoleArn field's value.
 func (s *DescribeTypeOutput) SetExecutionRoleArn(v string) *DescribeTypeOutput {
 	s.ExecutionRoleArn = &v
+	return s
+}
+
+// SetIsDefaultVersion sets the IsDefaultVersion field's value.
+func (s *DescribeTypeOutput) SetIsDefaultVersion(v bool) *DescribeTypeOutput {
+	s.IsDefaultVersion = &v
 	return s
 }
 
@@ -10220,6 +10655,9 @@ func (s *ListImportsOutput) SetNextToken(v string) *ListImportsOutput {
 type ListStackInstancesInput struct {
 	_ struct{} `type:"structure"`
 
+	// The status that stack instances are filtered by.
+	Filters []*StackInstanceFilter `type:"list"`
+
 	// The maximum number of results to be returned with a single call. If the number
 	// of available results exceeds this maximum, the response includes a NextToken
 	// value that you can assign to the NextToken request parameter to get the next
@@ -10268,11 +10706,27 @@ func (s *ListStackInstancesInput) Validate() error {
 	if s.StackSetName == nil {
 		invalidParams.Add(request.NewErrParamRequired("StackSetName"))
 	}
+	if s.Filters != nil {
+		for i, v := range s.Filters {
+			if v == nil {
+				continue
+			}
+			if err := v.Validate(); err != nil {
+				invalidParams.AddNested(fmt.Sprintf("%s[%v]", "Filters", i), err.(request.ErrInvalidParams))
+			}
+		}
+	}
 
 	if invalidParams.Len() > 0 {
 		return invalidParams
 	}
 	return nil
+}
+
+// SetFilters sets the Filters field's value.
+func (s *ListStackInstancesInput) SetFilters(v []*StackInstanceFilter) *ListStackInstancesInput {
+	s.Filters = v
+	return s
 }
 
 // SetMaxResults sets the MaxResults field's value.
@@ -11183,6 +11637,9 @@ type ListTypesInput struct {
 	//    handlers, and therefore cannot actually be provisioned.
 	ProvisioningType *string `type:"string" enum:"ProvisioningType"`
 
+	// The type of extension.
+	Type *string `type:"string" enum:"RegistryType"`
+
 	// The scope at which the type is visible and usable in CloudFormation operations.
 	//
 	// Valid values include:
@@ -11245,6 +11702,12 @@ func (s *ListTypesInput) SetNextToken(v string) *ListTypesInput {
 // SetProvisioningType sets the ProvisioningType field's value.
 func (s *ListTypesInput) SetProvisioningType(v string) *ListTypesInput {
 	s.ProvisioningType = &v
+	return s
+}
+
+// SetType sets the Type field's value.
+func (s *ListTypesInput) SetType(v string) *ListTypesInput {
+	s.Type = &v
 	return s
 }
 
@@ -11348,6 +11811,62 @@ func (s *LoggingConfig) SetLogGroupName(v string) *LoggingConfig {
 // SetLogRoleArn sets the LogRoleArn field's value.
 func (s *LoggingConfig) SetLogRoleArn(v string) *LoggingConfig {
 	s.LogRoleArn = &v
+	return s
+}
+
+// Contains information about the module from which the resource was created,
+// if the resource was created from a module included in the stack template.
+//
+// For more information on modules, see Using modules to encapsulate and reuse
+// resource configurations (AWSCloudFormation/latest/UserGuide/modules.html)
+// in the CloudFormation User Guide.
+type ModuleInfo struct {
+	_ struct{} `type:"structure"`
+
+	// A concantenated list of the logical IDs of the module or modules containing
+	// the resource. Modules are listed starting with the inner-most nested module,
+	// and separated by /.
+	//
+	// In the following example, the resource was created from a module, moduleA,
+	// that is nested inside a parent module, moduleB.
+	//
+	// moduleA/moduleB
+	//
+	// For more information, see Referencing resources in a module (AWSCloudFormation/latest/UserGuide/modules.html#module-ref-resources)
+	// in the CloudFormation User Guide.
+	LogicalIdHierarchy *string `type:"string"`
+
+	// A concantenated list of the the module type or types containing the resource.
+	// Module types are listed starting with the inner-most nested module, and separated
+	// by /.
+	//
+	// In the following example, the resource was created from a module of type
+	// AWS::First::Example::MODULE, that is nested inside a parent module of type
+	// AWS::Second::Example::MODULE.
+	//
+	// AWS::First::Example::MODULE/AWS::Second::Example::MODULE
+	TypeHierarchy *string `type:"string"`
+}
+
+// String returns the string representation
+func (s ModuleInfo) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s ModuleInfo) GoString() string {
+	return s.String()
+}
+
+// SetLogicalIdHierarchy sets the LogicalIdHierarchy field's value.
+func (s *ModuleInfo) SetLogicalIdHierarchy(v string) *ModuleInfo {
+	s.LogicalIdHierarchy = &v
+	return s
+}
+
+// SetTypeHierarchy sets the TypeHierarchy field's value.
+func (s *ModuleInfo) SetTypeHierarchy(v string) *ModuleInfo {
+	s.TypeHierarchy = &v
 	return s
 }
 
@@ -11798,12 +12317,15 @@ type RegisterTypeInput struct {
 	// if the request is submitted multiple times.
 	ClientRequestToken *string `min:"1" type:"string"`
 
-	// The Amazon Resource Name (ARN) of the IAM execution role to use to register
-	// the type. If your resource type calls AWS APIs in any of its handlers, you
-	// must create an IAM execution role (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html)
+	// The Amazon Resource Name (ARN) of the IAM role for CloudFormation to assume
+	// when invoking the resource provider. If your resource type calls AWS APIs
+	// in any of its handlers, you must create an IAM execution role (https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html)
 	// that includes the necessary permissions to call those AWS APIs, and provision
-	// that execution role in your account. CloudFormation then assumes that execution
-	// role to provide your resource type with the appropriate credentials.
+	// that execution role in your account. When CloudFormation needs to invoke
+	// the resource provider handler, CloudFormation assumes this execution role
+	// to create a temporary session token, which it then passes to the resource
+	// provider handler, thereby supplying your resource provider with the appropriate
+	// credentials.
 	ExecutionRoleArn *string `min:"1" type:"string"`
 
 	// Specifies logging configuration information for a type.
@@ -11817,11 +12339,12 @@ type RegisterTypeInput struct {
 	// to register, see submit (https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-cli-submit.html)
 	// in the CloudFormation CLI User Guide.
 	//
-	// As part of registering a resource provider type, CloudFormation must be able
-	// to access the S3 bucket which contains the schema handler package for that
-	// resource provider. For more information, see IAM Permissions for Registering
-	// a Resource Provider (https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/registry.html#registry-register-permissions)
-	// in the AWS CloudFormation User Guide.
+	// The user registering the resource provider type must be able to access the
+	// the schema handler package in the S3 bucket. That is, the user needs to have
+	// GetObject (https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html)
+	// permissions for the schema handler package. For more information, see Actions,
+	// Resources, and Condition Keys for Amazon S3 (https://docs.aws.amazon.com/IAM/latest/UserGuide/list_amazons3.html)
+	// in the AWS Identity and Access Management User Guide.
 	//
 	// SchemaHandlerPackage is a required field
 	SchemaHandlerPackage *string `min:"1" type:"string" required:"true"`
@@ -11965,8 +12488,13 @@ type ResourceChange struct {
 	_ struct{} `type:"structure"`
 
 	// The action that AWS CloudFormation takes on the resource, such as Add (adds
-	// a new resource), Modify (changes a resource), or Remove (deletes a resource).
+	// a new resource), Modify (changes a resource), Remove (deletes a resource),
+	// Import (imports a resource), or Dynamic (exact action for the resource cannot
+	// be determined).
 	Action *string `type:"string" enum:"ChangeAction"`
+
+	// The change set ID of the nested change set.
+	ChangeSetId *string `min:"1" type:"string"`
 
 	// For the Modify action, a list of ResourceChangeDetail structures that describes
 	// the changes that AWS CloudFormation will make to the resource.
@@ -11974,6 +12502,10 @@ type ResourceChange struct {
 
 	// The resource's logical ID, which is defined in the stack's template.
 	LogicalResourceId *string `type:"string"`
+
+	// Contains information about the module from which the resource was created,
+	// if the resource was created from a module included in the stack template.
+	ModuleInfo *ModuleInfo `type:"structure"`
 
 	// The resource's physical ID (resource name). Resources that you are adding
 	// don't have physical IDs because they haven't been created.
@@ -12017,6 +12549,12 @@ func (s *ResourceChange) SetAction(v string) *ResourceChange {
 	return s
 }
 
+// SetChangeSetId sets the ChangeSetId field's value.
+func (s *ResourceChange) SetChangeSetId(v string) *ResourceChange {
+	s.ChangeSetId = &v
+	return s
+}
+
 // SetDetails sets the Details field's value.
 func (s *ResourceChange) SetDetails(v []*ResourceChangeDetail) *ResourceChange {
 	s.Details = v
@@ -12026,6 +12564,12 @@ func (s *ResourceChange) SetDetails(v []*ResourceChangeDetail) *ResourceChange {
 // SetLogicalResourceId sets the LogicalResourceId field's value.
 func (s *ResourceChange) SetLogicalResourceId(v string) *ResourceChange {
 	s.LogicalResourceId = &v
+	return s
+}
+
+// SetModuleInfo sets the ModuleInfo field's value.
+func (s *ResourceChange) SetModuleInfo(v *ModuleInfo) *ResourceChange {
+	s.ModuleInfo = v
 	return s
 }
 
@@ -12259,6 +12803,9 @@ type ResourceToImport struct {
 	ResourceIdentifier map[string]*string `min:"1" type:"map" required:"true"`
 
 	// The type of resource to import into your stack, such as AWS::S3::Bucket.
+	// For a list of supported resource types, see Resources that support import
+	// operations (https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resource-import-supported-resources.html)
+	// in the AWS CloudFormation User Guide.
 	//
 	// ResourceType is a required field
 	ResourceType *string `min:"1" type:"string" required:"true"`
@@ -13276,7 +13823,8 @@ type StackInstance struct {
 	// which drift detection has not yet been performed.
 	LastDriftCheckTimestamp *time.Time `type:"timestamp"`
 
-	// Reserved for internal use. No data returned.
+	// [Service-managed permissions] The organization root ID or organizational
+	// unit (OU) IDs that you specified for DeploymentTargets (https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_DeploymentTargets.html).
 	OrganizationalUnitId *string `type:"string"`
 
 	// A list of parameters from the stack set template whose values have been overridden
@@ -13288,6 +13836,9 @@ type StackInstance struct {
 
 	// The ID of the stack instance.
 	StackId *string `type:"string"`
+
+	// The detailed status of the stack instance.
+	StackInstanceStatus *StackInstanceComprehensiveStatus `type:"structure"`
 
 	// The name or unique ID of the stack set that the stack instance is associated
 	// with.
@@ -13367,6 +13918,12 @@ func (s *StackInstance) SetStackId(v string) *StackInstance {
 	return s
 }
 
+// SetStackInstanceStatus sets the StackInstanceStatus field's value.
+func (s *StackInstance) SetStackInstanceStatus(v *StackInstanceComprehensiveStatus) *StackInstance {
+	s.StackInstanceStatus = v
+	return s
+}
+
 // SetStackSetId sets the StackSetId field's value.
 func (s *StackInstance) SetStackSetId(v string) *StackInstance {
 	s.StackSetId = &v
@@ -13382,6 +13939,97 @@ func (s *StackInstance) SetStatus(v string) *StackInstance {
 // SetStatusReason sets the StatusReason field's value.
 func (s *StackInstance) SetStatusReason(v string) *StackInstance {
 	s.StatusReason = &v
+	return s
+}
+
+// The detailed status of the stack instance.
+type StackInstanceComprehensiveStatus struct {
+	_ struct{} `type:"structure"`
+
+	//    * CANCELLED: The operation in the specified account and Region has been
+	//    cancelled. This is either because a user has stopped the stack set operation,
+	//    or because the failure tolerance of the stack set operation has been exceeded.
+	//
+	//    * FAILED: The operation in the specified account and Region failed. If
+	//    the stack set operation fails in enough accounts within a Region, the
+	//    failure tolerance for the stack set operation as a whole might be exceeded.
+	//
+	//    * INOPERABLE: A DeleteStackInstances operation has failed and left the
+	//    stack in an unstable state. Stacks in this state are excluded from further
+	//    UpdateStackSet operations. You might need to perform a DeleteStackInstances
+	//    operation, with RetainStacks set to true, to delete the stack instance,
+	//    and then delete the stack manually.
+	//
+	//    * PENDING: The operation in the specified account and Region has yet to
+	//    start.
+	//
+	//    * RUNNING: The operation in the specified account and Region is currently
+	//    in progress.
+	//
+	//    * SUCCEEDED: The operation in the specified account and Region completed
+	//    successfully.
+	DetailedStatus *string `type:"string" enum:"StackInstanceDetailedStatus"`
+}
+
+// String returns the string representation
+func (s StackInstanceComprehensiveStatus) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s StackInstanceComprehensiveStatus) GoString() string {
+	return s.String()
+}
+
+// SetDetailedStatus sets the DetailedStatus field's value.
+func (s *StackInstanceComprehensiveStatus) SetDetailedStatus(v string) *StackInstanceComprehensiveStatus {
+	s.DetailedStatus = &v
+	return s
+}
+
+// The status that stack instances are filtered by.
+type StackInstanceFilter struct {
+	_ struct{} `type:"structure"`
+
+	// The type of filter to apply.
+	Name *string `type:"string" enum:"StackInstanceFilterName"`
+
+	// The status to filter by.
+	Values *string `min:"6" type:"string"`
+}
+
+// String returns the string representation
+func (s StackInstanceFilter) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s StackInstanceFilter) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *StackInstanceFilter) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "StackInstanceFilter"}
+	if s.Values != nil && len(*s.Values) < 6 {
+		invalidParams.Add(request.NewErrParamMinLen("Values", 6))
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetName sets the Name field's value.
+func (s *StackInstanceFilter) SetName(v string) *StackInstanceFilter {
+	s.Name = &v
+	return s
+}
+
+// SetValues sets the Values field's value.
+func (s *StackInstanceFilter) SetValues(v string) *StackInstanceFilter {
+	s.Values = &v
 	return s
 }
 
@@ -13415,7 +14063,8 @@ type StackInstanceSummary struct {
 	// which drift detection has not yet been performed.
 	LastDriftCheckTimestamp *time.Time `type:"timestamp"`
 
-	// Reserved for internal use. No data returned.
+	// [Service-managed permissions] The organization root ID or organizational
+	// unit (OU) IDs that you specified for DeploymentTargets (https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_DeploymentTargets.html).
 	OrganizationalUnitId *string `type:"string"`
 
 	// The name of the AWS Region that the stack instance is associated with.
@@ -13423,6 +14072,9 @@ type StackInstanceSummary struct {
 
 	// The ID of the stack instance.
 	StackId *string `type:"string"`
+
+	// The detailed status of the stack instance.
+	StackInstanceStatus *StackInstanceComprehensiveStatus `type:"structure"`
 
 	// The name or unique ID of the stack set that the stack instance is associated
 	// with.
@@ -13495,6 +14147,12 @@ func (s *StackInstanceSummary) SetStackId(v string) *StackInstanceSummary {
 	return s
 }
 
+// SetStackInstanceStatus sets the StackInstanceStatus field's value.
+func (s *StackInstanceSummary) SetStackInstanceStatus(v *StackInstanceComprehensiveStatus) *StackInstanceSummary {
+	s.StackInstanceStatus = v
+	return s
+}
+
 // SetStackSetId sets the StackSetId field's value.
 func (s *StackInstanceSummary) SetStackSetId(v string) *StackInstanceSummary {
 	s.StackSetId = &v
@@ -13530,6 +14188,10 @@ type StackResource struct {
 	//
 	// LogicalResourceId is a required field
 	LogicalResourceId *string `type:"string" required:"true"`
+
+	// Contains information about the module from which the resource was created,
+	// if the resource was created from a module included in the stack template.
+	ModuleInfo *ModuleInfo `type:"structure"`
 
 	// The name or unique identifier that corresponds to a physical instance ID
 	// of a resource supported by AWS CloudFormation.
@@ -13587,6 +14249,12 @@ func (s *StackResource) SetDriftInformation(v *StackResourceDriftInformation) *S
 // SetLogicalResourceId sets the LogicalResourceId field's value.
 func (s *StackResource) SetLogicalResourceId(v string) *StackResource {
 	s.LogicalResourceId = &v
+	return s
+}
+
+// SetModuleInfo sets the ModuleInfo field's value.
+func (s *StackResource) SetModuleInfo(v *ModuleInfo) *StackResource {
+	s.ModuleInfo = v
 	return s
 }
 
@@ -13660,6 +14328,10 @@ type StackResourceDetail struct {
 	// in the AWS CloudFormation User Guide.
 	Metadata *string `type:"string"`
 
+	// Contains information about the module from which the resource was created,
+	// if the resource was created from a module included in the stack template.
+	ModuleInfo *ModuleInfo `type:"structure"`
+
 	// The name or unique identifier that corresponds to a physical instance ID
 	// of a resource supported by AWS CloudFormation.
 	PhysicalResourceId *string `type:"string"`
@@ -13723,6 +14395,12 @@ func (s *StackResourceDetail) SetLogicalResourceId(v string) *StackResourceDetai
 // SetMetadata sets the Metadata field's value.
 func (s *StackResourceDetail) SetMetadata(v string) *StackResourceDetail {
 	s.Metadata = &v
+	return s
+}
+
+// SetModuleInfo sets the ModuleInfo field's value.
+func (s *StackResourceDetail) SetModuleInfo(v *ModuleInfo) *StackResourceDetail {
+	s.ModuleInfo = v
 	return s
 }
 
@@ -13795,6 +14473,10 @@ type StackResourceDrift struct {
 	//
 	// LogicalResourceId is a required field
 	LogicalResourceId *string `type:"string" required:"true"`
+
+	// Contains information about the module from which the resource was created,
+	// if the resource was created from a module included in the stack template.
+	ModuleInfo *ModuleInfo `type:"structure"`
 
 	// The name or unique identifier that corresponds to a physical instance ID
 	// of a resource supported by AWS CloudFormation.
@@ -13870,6 +14552,12 @@ func (s *StackResourceDrift) SetExpectedProperties(v string) *StackResourceDrift
 // SetLogicalResourceId sets the LogicalResourceId field's value.
 func (s *StackResourceDrift) SetLogicalResourceId(v string) *StackResourceDrift {
 	s.LogicalResourceId = &v
+	return s
+}
+
+// SetModuleInfo sets the ModuleInfo field's value.
+func (s *StackResourceDrift) SetModuleInfo(v *ModuleInfo) *StackResourceDrift {
+	s.ModuleInfo = v
 	return s
 }
 
@@ -14038,6 +14726,10 @@ type StackResourceSummary struct {
 	// LogicalResourceId is a required field
 	LogicalResourceId *string `type:"string" required:"true"`
 
+	// Contains information about the module from which the resource was created,
+	// if the resource was created from a module included in the stack template.
+	ModuleInfo *ModuleInfo `type:"structure"`
+
 	// The name or unique identifier that corresponds to a physical instance ID
 	// of the resource.
 	PhysicalResourceId *string `type:"string"`
@@ -14083,6 +14775,12 @@ func (s *StackResourceSummary) SetLastUpdatedTimestamp(v time.Time) *StackResour
 // SetLogicalResourceId sets the LogicalResourceId field's value.
 func (s *StackResourceSummary) SetLogicalResourceId(v string) *StackResourceSummary {
 	s.LogicalResourceId = &v
+	return s
+}
+
+// SetModuleInfo sets the ModuleInfo field's value.
+func (s *StackResourceSummary) SetModuleInfo(v *ModuleInfo) *StackResourceSummary {
+	s.ModuleInfo = v
 	return s
 }
 
@@ -14148,7 +14846,8 @@ type StackSet struct {
 	// groups can include in their stack sets.
 	ExecutionRoleName *string `min:"1" type:"string"`
 
-	// Reserved for internal use. No data returned.
+	// [Service-managed permissions] The organization root ID or organizational
+	// unit (OU) IDs that you specified for DeploymentTargets (https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_DeploymentTargets.html).
 	OrganizationalUnitIds []*string `type:"list"`
 
 	// A list of input parameters for a stack set.
@@ -14638,8 +15337,8 @@ type StackSetOperationPreferences struct {
 	FailureTolerancePercentage *int64 `type:"integer"`
 
 	// The maximum number of accounts in which to perform this operation at one
-	// time. This is dependent on the value of FailureToleranceCount—MaxConcurrentCount
-	// is at most one more than the FailureToleranceCount .
+	// time. This is dependent on the value of FailureToleranceCount. MaxConcurrentCount
+	// is at most one more than the FailureToleranceCount.
 	//
 	// Note that this setting lets you specify the maximum for operations. For large
 	// deployments, under certain circumstances the actual number of accounts acted
@@ -14738,7 +15437,8 @@ type StackSetOperationResultSummary struct {
 	// before proceeding with stack set operations in an account
 	AccountGateResult *AccountGateResult `type:"structure"`
 
-	// Reserved for internal use. No data returned.
+	// [Service-managed permissions] The organization root ID or organizational
+	// unit (OU) IDs that you specified for DeploymentTargets (https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_DeploymentTargets.html).
 	OrganizationalUnitId *string `type:"string"`
 
 	// The name of the AWS Region for this operation result.
@@ -15424,6 +16124,9 @@ type TypeVersionSummary struct {
 	// The description of the type version.
 	Description *string `min:"1" type:"string"`
 
+	// Whether the specified type version is set as the default version.
+	IsDefaultVersion *bool `type:"boolean"`
+
 	// When the version was registered.
 	TimeCreated *time.Time `type:"timestamp"`
 
@@ -15458,6 +16161,12 @@ func (s *TypeVersionSummary) SetArn(v string) *TypeVersionSummary {
 // SetDescription sets the Description field's value.
 func (s *TypeVersionSummary) SetDescription(v string) *TypeVersionSummary {
 	s.Description = &v
+	return s
+}
+
+// SetIsDefaultVersion sets the IsDefaultVersion field's value.
+func (s *TypeVersionSummary) SetIsDefaultVersion(v bool) *TypeVersionSummary {
+	s.IsDefaultVersion = &v
 	return s
 }
 
@@ -15523,16 +16232,16 @@ type UpdateStackInput struct {
 	//    template, without first reviewing the resulting changes in a change set,
 	//    you must acknowledge this capability. This includes the AWS::Include (http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/create-reusable-transform-function-snippets-and-add-to-your-template-with-aws-include-transform.html)
 	//    and AWS::Serverless (http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-aws-serverless.html)
-	//    transforms, which are macros hosted by AWS CloudFormation. Change sets
-	//    do not currently support nested stacks. If you want to update a stack
-	//    from a stack template that contains macros and nested stacks, you must
-	//    update the stack directly from the template using this capability. You
-	//    should only update stacks directly from a stack template that contains
-	//    macros if you know what processing the macro performs. Each macro relies
-	//    on an underlying Lambda service function for processing stack templates.
-	//    Be aware that the Lambda function owner can update the function operation
-	//    without AWS CloudFormation being notified. For more information, see Using
-	//    AWS CloudFormation Macros to Perform Custom Processing on Templates (http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html).
+	//    transforms, which are macros hosted by AWS CloudFormation. If you want
+	//    to update a stack from a stack template that contains macros and nested
+	//    stacks, you must update the stack directly from the template using this
+	//    capability. You should only update stacks directly from a stack template
+	//    that contains macros if you know what processing the macro performs. Each
+	//    macro relies on an underlying Lambda service function for processing stack
+	//    templates. Be aware that the Lambda function owner can update the function
+	//    operation without AWS CloudFormation being notified. For more information,
+	//    see Using AWS CloudFormation Macros to Perform Custom Processing on Templates
+	//    (http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html).
 	Capabilities []*string `type:"list"`
 
 	// A unique identifier for this UpdateStack request. Specify this token if you
@@ -16650,6 +17359,15 @@ const (
 	AccountGateStatusSkipped = "SKIPPED"
 )
 
+// AccountGateStatus_Values returns all elements of the AccountGateStatus enum
+func AccountGateStatus_Values() []string {
+	return []string{
+		AccountGateStatusSucceeded,
+		AccountGateStatusFailed,
+		AccountGateStatusSkipped,
+	}
+}
+
 const (
 	// CapabilityCapabilityIam is a Capability enum value
 	CapabilityCapabilityIam = "CAPABILITY_IAM"
@@ -16660,6 +17378,15 @@ const (
 	// CapabilityCapabilityAutoExpand is a Capability enum value
 	CapabilityCapabilityAutoExpand = "CAPABILITY_AUTO_EXPAND"
 )
+
+// Capability_Values returns all elements of the Capability enum
+func Capability_Values() []string {
+	return []string{
+		CapabilityCapabilityIam,
+		CapabilityCapabilityNamedIam,
+		CapabilityCapabilityAutoExpand,
+	}
+}
 
 const (
 	// ChangeActionAdd is a ChangeAction enum value
@@ -16673,7 +17400,21 @@ const (
 
 	// ChangeActionImport is a ChangeAction enum value
 	ChangeActionImport = "Import"
+
+	// ChangeActionDynamic is a ChangeAction enum value
+	ChangeActionDynamic = "Dynamic"
 )
+
+// ChangeAction_Values returns all elements of the ChangeAction enum
+func ChangeAction_Values() []string {
+	return []string{
+		ChangeActionAdd,
+		ChangeActionModify,
+		ChangeActionRemove,
+		ChangeActionImport,
+		ChangeActionDynamic,
+	}
+}
 
 const (
 	// ChangeSetStatusCreatePending is a ChangeSetStatus enum value
@@ -16685,12 +17426,35 @@ const (
 	// ChangeSetStatusCreateComplete is a ChangeSetStatus enum value
 	ChangeSetStatusCreateComplete = "CREATE_COMPLETE"
 
+	// ChangeSetStatusDeletePending is a ChangeSetStatus enum value
+	ChangeSetStatusDeletePending = "DELETE_PENDING"
+
+	// ChangeSetStatusDeleteInProgress is a ChangeSetStatus enum value
+	ChangeSetStatusDeleteInProgress = "DELETE_IN_PROGRESS"
+
 	// ChangeSetStatusDeleteComplete is a ChangeSetStatus enum value
 	ChangeSetStatusDeleteComplete = "DELETE_COMPLETE"
+
+	// ChangeSetStatusDeleteFailed is a ChangeSetStatus enum value
+	ChangeSetStatusDeleteFailed = "DELETE_FAILED"
 
 	// ChangeSetStatusFailed is a ChangeSetStatus enum value
 	ChangeSetStatusFailed = "FAILED"
 )
+
+// ChangeSetStatus_Values returns all elements of the ChangeSetStatus enum
+func ChangeSetStatus_Values() []string {
+	return []string{
+		ChangeSetStatusCreatePending,
+		ChangeSetStatusCreateInProgress,
+		ChangeSetStatusCreateComplete,
+		ChangeSetStatusDeletePending,
+		ChangeSetStatusDeleteInProgress,
+		ChangeSetStatusDeleteComplete,
+		ChangeSetStatusDeleteFailed,
+		ChangeSetStatusFailed,
+	}
+}
 
 const (
 	// ChangeSetTypeCreate is a ChangeSetType enum value
@@ -16702,6 +17466,15 @@ const (
 	// ChangeSetTypeImport is a ChangeSetType enum value
 	ChangeSetTypeImport = "IMPORT"
 )
+
+// ChangeSetType_Values returns all elements of the ChangeSetType enum
+func ChangeSetType_Values() []string {
+	return []string{
+		ChangeSetTypeCreate,
+		ChangeSetTypeUpdate,
+		ChangeSetTypeImport,
+	}
+}
 
 const (
 	// ChangeSourceResourceReference is a ChangeSource enum value
@@ -16720,10 +17493,28 @@ const (
 	ChangeSourceAutomatic = "Automatic"
 )
 
+// ChangeSource_Values returns all elements of the ChangeSource enum
+func ChangeSource_Values() []string {
+	return []string{
+		ChangeSourceResourceReference,
+		ChangeSourceParameterReference,
+		ChangeSourceResourceAttribute,
+		ChangeSourceDirectModification,
+		ChangeSourceAutomatic,
+	}
+}
+
 const (
 	// ChangeTypeResource is a ChangeType enum value
 	ChangeTypeResource = "Resource"
 )
+
+// ChangeType_Values returns all elements of the ChangeType enum
+func ChangeType_Values() []string {
+	return []string{
+		ChangeTypeResource,
+	}
+}
 
 const (
 	// DeprecatedStatusLive is a DeprecatedStatus enum value
@@ -16732,6 +17523,14 @@ const (
 	// DeprecatedStatusDeprecated is a DeprecatedStatus enum value
 	DeprecatedStatusDeprecated = "DEPRECATED"
 )
+
+// DeprecatedStatus_Values returns all elements of the DeprecatedStatus enum
+func DeprecatedStatus_Values() []string {
+	return []string{
+		DeprecatedStatusLive,
+		DeprecatedStatusDeprecated,
+	}
+}
 
 const (
 	// DifferenceTypeAdd is a DifferenceType enum value
@@ -16744,6 +17543,15 @@ const (
 	DifferenceTypeNotEqual = "NOT_EQUAL"
 )
 
+// DifferenceType_Values returns all elements of the DifferenceType enum
+func DifferenceType_Values() []string {
+	return []string{
+		DifferenceTypeAdd,
+		DifferenceTypeRemove,
+		DifferenceTypeNotEqual,
+	}
+}
+
 const (
 	// EvaluationTypeStatic is a EvaluationType enum value
 	EvaluationTypeStatic = "Static"
@@ -16751,6 +17559,14 @@ const (
 	// EvaluationTypeDynamic is a EvaluationType enum value
 	EvaluationTypeDynamic = "Dynamic"
 )
+
+// EvaluationType_Values returns all elements of the EvaluationType enum
+func EvaluationType_Values() []string {
+	return []string{
+		EvaluationTypeStatic,
+		EvaluationTypeDynamic,
+	}
+}
 
 const (
 	// ExecutionStatusUnavailable is a ExecutionStatus enum value
@@ -16771,6 +17587,18 @@ const (
 	// ExecutionStatusObsolete is a ExecutionStatus enum value
 	ExecutionStatusObsolete = "OBSOLETE"
 )
+
+// ExecutionStatus_Values returns all elements of the ExecutionStatus enum
+func ExecutionStatus_Values() []string {
+	return []string{
+		ExecutionStatusUnavailable,
+		ExecutionStatusAvailable,
+		ExecutionStatusExecuteInProgress,
+		ExecutionStatusExecuteComplete,
+		ExecutionStatusExecuteFailed,
+		ExecutionStatusObsolete,
+	}
+}
 
 const (
 	// HandlerErrorCodeNotUpdatable is a HandlerErrorCode enum value
@@ -16816,6 +17644,26 @@ const (
 	HandlerErrorCodeInternalFailure = "InternalFailure"
 )
 
+// HandlerErrorCode_Values returns all elements of the HandlerErrorCode enum
+func HandlerErrorCode_Values() []string {
+	return []string{
+		HandlerErrorCodeNotUpdatable,
+		HandlerErrorCodeInvalidRequest,
+		HandlerErrorCodeAccessDenied,
+		HandlerErrorCodeInvalidCredentials,
+		HandlerErrorCodeAlreadyExists,
+		HandlerErrorCodeNotFound,
+		HandlerErrorCodeResourceConflict,
+		HandlerErrorCodeThrottling,
+		HandlerErrorCodeServiceLimitExceeded,
+		HandlerErrorCodeNotStabilized,
+		HandlerErrorCodeGeneralServiceException,
+		HandlerErrorCodeServiceInternalError,
+		HandlerErrorCodeNetworkFailure,
+		HandlerErrorCodeInternalFailure,
+	}
+}
+
 const (
 	// OnFailureDoNothing is a OnFailure enum value
 	OnFailureDoNothing = "DO_NOTHING"
@@ -16826,6 +17674,15 @@ const (
 	// OnFailureDelete is a OnFailure enum value
 	OnFailureDelete = "DELETE"
 )
+
+// OnFailure_Values returns all elements of the OnFailure enum
+func OnFailure_Values() []string {
+	return []string{
+		OnFailureDoNothing,
+		OnFailureRollback,
+		OnFailureDelete,
+	}
+}
 
 const (
 	// OperationStatusPending is a OperationStatus enum value
@@ -16841,6 +17698,16 @@ const (
 	OperationStatusFailed = "FAILED"
 )
 
+// OperationStatus_Values returns all elements of the OperationStatus enum
+func OperationStatus_Values() []string {
+	return []string{
+		OperationStatusPending,
+		OperationStatusInProgress,
+		OperationStatusSuccess,
+		OperationStatusFailed,
+	}
+}
+
 const (
 	// PermissionModelsServiceManaged is a PermissionModels enum value
 	PermissionModelsServiceManaged = "SERVICE_MANAGED"
@@ -16848,6 +17715,14 @@ const (
 	// PermissionModelsSelfManaged is a PermissionModels enum value
 	PermissionModelsSelfManaged = "SELF_MANAGED"
 )
+
+// PermissionModels_Values returns all elements of the PermissionModels enum
+func PermissionModels_Values() []string {
+	return []string{
+		PermissionModelsServiceManaged,
+		PermissionModelsSelfManaged,
+	}
+}
 
 const (
 	// ProvisioningTypeNonProvisionable is a ProvisioningType enum value
@@ -16860,6 +17735,15 @@ const (
 	ProvisioningTypeFullyMutable = "FULLY_MUTABLE"
 )
 
+// ProvisioningType_Values returns all elements of the ProvisioningType enum
+func ProvisioningType_Values() []string {
+	return []string{
+		ProvisioningTypeNonProvisionable,
+		ProvisioningTypeImmutable,
+		ProvisioningTypeFullyMutable,
+	}
+}
+
 const (
 	// RegistrationStatusComplete is a RegistrationStatus enum value
 	RegistrationStatusComplete = "COMPLETE"
@@ -16871,10 +17755,30 @@ const (
 	RegistrationStatusFailed = "FAILED"
 )
 
+// RegistrationStatus_Values returns all elements of the RegistrationStatus enum
+func RegistrationStatus_Values() []string {
+	return []string{
+		RegistrationStatusComplete,
+		RegistrationStatusInProgress,
+		RegistrationStatusFailed,
+	}
+}
+
 const (
 	// RegistryTypeResource is a RegistryType enum value
 	RegistryTypeResource = "RESOURCE"
+
+	// RegistryTypeModule is a RegistryType enum value
+	RegistryTypeModule = "MODULE"
 )
+
+// RegistryType_Values returns all elements of the RegistryType enum
+func RegistryType_Values() []string {
+	return []string{
+		RegistryTypeResource,
+		RegistryTypeModule,
+	}
+}
 
 const (
 	// ReplacementTrue is a Replacement enum value
@@ -16887,6 +17791,15 @@ const (
 	ReplacementConditional = "Conditional"
 )
 
+// Replacement_Values returns all elements of the Replacement enum
+func Replacement_Values() []string {
+	return []string{
+		ReplacementTrue,
+		ReplacementFalse,
+		ReplacementConditional,
+	}
+}
+
 const (
 	// RequiresRecreationNever is a RequiresRecreation enum value
 	RequiresRecreationNever = "Never"
@@ -16897,6 +17810,15 @@ const (
 	// RequiresRecreationAlways is a RequiresRecreation enum value
 	RequiresRecreationAlways = "Always"
 )
+
+// RequiresRecreation_Values returns all elements of the RequiresRecreation enum
+func RequiresRecreation_Values() []string {
+	return []string{
+		RequiresRecreationNever,
+		RequiresRecreationConditionally,
+		RequiresRecreationAlways,
+	}
+}
 
 const (
 	// ResourceAttributeProperties is a ResourceAttribute enum value
@@ -16918,6 +17840,18 @@ const (
 	ResourceAttributeTags = "Tags"
 )
 
+// ResourceAttribute_Values returns all elements of the ResourceAttribute enum
+func ResourceAttribute_Values() []string {
+	return []string{
+		ResourceAttributeProperties,
+		ResourceAttributeMetadata,
+		ResourceAttributeCreationPolicy,
+		ResourceAttributeUpdatePolicy,
+		ResourceAttributeDeletionPolicy,
+		ResourceAttributeTags,
+	}
+}
+
 const (
 	// ResourceSignalStatusSuccess is a ResourceSignalStatus enum value
 	ResourceSignalStatusSuccess = "SUCCESS"
@@ -16925,6 +17859,14 @@ const (
 	// ResourceSignalStatusFailure is a ResourceSignalStatus enum value
 	ResourceSignalStatusFailure = "FAILURE"
 )
+
+// ResourceSignalStatus_Values returns all elements of the ResourceSignalStatus enum
+func ResourceSignalStatus_Values() []string {
+	return []string{
+		ResourceSignalStatusSuccess,
+		ResourceSignalStatusFailure,
+	}
+}
 
 const (
 	// ResourceStatusCreateInProgress is a ResourceStatus enum value
@@ -16976,6 +17918,28 @@ const (
 	ResourceStatusImportRollbackComplete = "IMPORT_ROLLBACK_COMPLETE"
 )
 
+// ResourceStatus_Values returns all elements of the ResourceStatus enum
+func ResourceStatus_Values() []string {
+	return []string{
+		ResourceStatusCreateInProgress,
+		ResourceStatusCreateFailed,
+		ResourceStatusCreateComplete,
+		ResourceStatusDeleteInProgress,
+		ResourceStatusDeleteFailed,
+		ResourceStatusDeleteComplete,
+		ResourceStatusDeleteSkipped,
+		ResourceStatusUpdateInProgress,
+		ResourceStatusUpdateFailed,
+		ResourceStatusUpdateComplete,
+		ResourceStatusImportFailed,
+		ResourceStatusImportComplete,
+		ResourceStatusImportInProgress,
+		ResourceStatusImportRollbackInProgress,
+		ResourceStatusImportRollbackFailed,
+		ResourceStatusImportRollbackComplete,
+	}
+}
+
 const (
 	// StackDriftDetectionStatusDetectionInProgress is a StackDriftDetectionStatus enum value
 	StackDriftDetectionStatusDetectionInProgress = "DETECTION_IN_PROGRESS"
@@ -16986,6 +17950,15 @@ const (
 	// StackDriftDetectionStatusDetectionComplete is a StackDriftDetectionStatus enum value
 	StackDriftDetectionStatusDetectionComplete = "DETECTION_COMPLETE"
 )
+
+// StackDriftDetectionStatus_Values returns all elements of the StackDriftDetectionStatus enum
+func StackDriftDetectionStatus_Values() []string {
+	return []string{
+		StackDriftDetectionStatusDetectionInProgress,
+		StackDriftDetectionStatusDetectionFailed,
+		StackDriftDetectionStatusDetectionComplete,
+	}
+}
 
 const (
 	// StackDriftStatusDrifted is a StackDriftStatus enum value
@@ -17001,6 +17974,60 @@ const (
 	StackDriftStatusNotChecked = "NOT_CHECKED"
 )
 
+// StackDriftStatus_Values returns all elements of the StackDriftStatus enum
+func StackDriftStatus_Values() []string {
+	return []string{
+		StackDriftStatusDrifted,
+		StackDriftStatusInSync,
+		StackDriftStatusUnknown,
+		StackDriftStatusNotChecked,
+	}
+}
+
+const (
+	// StackInstanceDetailedStatusPending is a StackInstanceDetailedStatus enum value
+	StackInstanceDetailedStatusPending = "PENDING"
+
+	// StackInstanceDetailedStatusRunning is a StackInstanceDetailedStatus enum value
+	StackInstanceDetailedStatusRunning = "RUNNING"
+
+	// StackInstanceDetailedStatusSucceeded is a StackInstanceDetailedStatus enum value
+	StackInstanceDetailedStatusSucceeded = "SUCCEEDED"
+
+	// StackInstanceDetailedStatusFailed is a StackInstanceDetailedStatus enum value
+	StackInstanceDetailedStatusFailed = "FAILED"
+
+	// StackInstanceDetailedStatusCancelled is a StackInstanceDetailedStatus enum value
+	StackInstanceDetailedStatusCancelled = "CANCELLED"
+
+	// StackInstanceDetailedStatusInoperable is a StackInstanceDetailedStatus enum value
+	StackInstanceDetailedStatusInoperable = "INOPERABLE"
+)
+
+// StackInstanceDetailedStatus_Values returns all elements of the StackInstanceDetailedStatus enum
+func StackInstanceDetailedStatus_Values() []string {
+	return []string{
+		StackInstanceDetailedStatusPending,
+		StackInstanceDetailedStatusRunning,
+		StackInstanceDetailedStatusSucceeded,
+		StackInstanceDetailedStatusFailed,
+		StackInstanceDetailedStatusCancelled,
+		StackInstanceDetailedStatusInoperable,
+	}
+}
+
+const (
+	// StackInstanceFilterNameDetailedStatus is a StackInstanceFilterName enum value
+	StackInstanceFilterNameDetailedStatus = "DETAILED_STATUS"
+)
+
+// StackInstanceFilterName_Values returns all elements of the StackInstanceFilterName enum
+func StackInstanceFilterName_Values() []string {
+	return []string{
+		StackInstanceFilterNameDetailedStatus,
+	}
+}
+
 const (
 	// StackInstanceStatusCurrent is a StackInstanceStatus enum value
 	StackInstanceStatusCurrent = "CURRENT"
@@ -17011,6 +18038,15 @@ const (
 	// StackInstanceStatusInoperable is a StackInstanceStatus enum value
 	StackInstanceStatusInoperable = "INOPERABLE"
 )
+
+// StackInstanceStatus_Values returns all elements of the StackInstanceStatus enum
+func StackInstanceStatus_Values() []string {
+	return []string{
+		StackInstanceStatusCurrent,
+		StackInstanceStatusOutdated,
+		StackInstanceStatusInoperable,
+	}
+}
 
 const (
 	// StackResourceDriftStatusInSync is a StackResourceDriftStatus enum value
@@ -17025,6 +18061,16 @@ const (
 	// StackResourceDriftStatusNotChecked is a StackResourceDriftStatus enum value
 	StackResourceDriftStatusNotChecked = "NOT_CHECKED"
 )
+
+// StackResourceDriftStatus_Values returns all elements of the StackResourceDriftStatus enum
+func StackResourceDriftStatus_Values() []string {
+	return []string{
+		StackResourceDriftStatusInSync,
+		StackResourceDriftStatusModified,
+		StackResourceDriftStatusDeleted,
+		StackResourceDriftStatusNotChecked,
+	}
+}
 
 const (
 	// StackSetDriftDetectionStatusCompleted is a StackSetDriftDetectionStatus enum value
@@ -17043,6 +18089,17 @@ const (
 	StackSetDriftDetectionStatusStopped = "STOPPED"
 )
 
+// StackSetDriftDetectionStatus_Values returns all elements of the StackSetDriftDetectionStatus enum
+func StackSetDriftDetectionStatus_Values() []string {
+	return []string{
+		StackSetDriftDetectionStatusCompleted,
+		StackSetDriftDetectionStatusFailed,
+		StackSetDriftDetectionStatusPartialSuccess,
+		StackSetDriftDetectionStatusInProgress,
+		StackSetDriftDetectionStatusStopped,
+	}
+}
+
 const (
 	// StackSetDriftStatusDrifted is a StackSetDriftStatus enum value
 	StackSetDriftStatusDrifted = "DRIFTED"
@@ -17053,6 +18110,15 @@ const (
 	// StackSetDriftStatusNotChecked is a StackSetDriftStatus enum value
 	StackSetDriftStatusNotChecked = "NOT_CHECKED"
 )
+
+// StackSetDriftStatus_Values returns all elements of the StackSetDriftStatus enum
+func StackSetDriftStatus_Values() []string {
+	return []string{
+		StackSetDriftStatusDrifted,
+		StackSetDriftStatusInSync,
+		StackSetDriftStatusNotChecked,
+	}
+}
 
 const (
 	// StackSetOperationActionCreate is a StackSetOperationAction enum value
@@ -17067,6 +18133,16 @@ const (
 	// StackSetOperationActionDetectDrift is a StackSetOperationAction enum value
 	StackSetOperationActionDetectDrift = "DETECT_DRIFT"
 )
+
+// StackSetOperationAction_Values returns all elements of the StackSetOperationAction enum
+func StackSetOperationAction_Values() []string {
+	return []string{
+		StackSetOperationActionCreate,
+		StackSetOperationActionUpdate,
+		StackSetOperationActionDelete,
+		StackSetOperationActionDetectDrift,
+	}
+}
 
 const (
 	// StackSetOperationResultStatusPending is a StackSetOperationResultStatus enum value
@@ -17084,6 +18160,17 @@ const (
 	// StackSetOperationResultStatusCancelled is a StackSetOperationResultStatus enum value
 	StackSetOperationResultStatusCancelled = "CANCELLED"
 )
+
+// StackSetOperationResultStatus_Values returns all elements of the StackSetOperationResultStatus enum
+func StackSetOperationResultStatus_Values() []string {
+	return []string{
+		StackSetOperationResultStatusPending,
+		StackSetOperationResultStatusRunning,
+		StackSetOperationResultStatusSucceeded,
+		StackSetOperationResultStatusFailed,
+		StackSetOperationResultStatusCancelled,
+	}
+}
 
 const (
 	// StackSetOperationStatusRunning is a StackSetOperationStatus enum value
@@ -17105,6 +18192,18 @@ const (
 	StackSetOperationStatusQueued = "QUEUED"
 )
 
+// StackSetOperationStatus_Values returns all elements of the StackSetOperationStatus enum
+func StackSetOperationStatus_Values() []string {
+	return []string{
+		StackSetOperationStatusRunning,
+		StackSetOperationStatusSucceeded,
+		StackSetOperationStatusFailed,
+		StackSetOperationStatusStopping,
+		StackSetOperationStatusStopped,
+		StackSetOperationStatusQueued,
+	}
+}
+
 const (
 	// StackSetStatusActive is a StackSetStatus enum value
 	StackSetStatusActive = "ACTIVE"
@@ -17112,6 +18211,14 @@ const (
 	// StackSetStatusDeleted is a StackSetStatus enum value
 	StackSetStatusDeleted = "DELETED"
 )
+
+// StackSetStatus_Values returns all elements of the StackSetStatus enum
+func StackSetStatus_Values() []string {
+	return []string{
+		StackSetStatusActive,
+		StackSetStatusDeleted,
+	}
+}
 
 const (
 	// StackStatusCreateInProgress is a StackStatus enum value
@@ -17181,6 +18288,34 @@ const (
 	StackStatusImportRollbackComplete = "IMPORT_ROLLBACK_COMPLETE"
 )
 
+// StackStatus_Values returns all elements of the StackStatus enum
+func StackStatus_Values() []string {
+	return []string{
+		StackStatusCreateInProgress,
+		StackStatusCreateFailed,
+		StackStatusCreateComplete,
+		StackStatusRollbackInProgress,
+		StackStatusRollbackFailed,
+		StackStatusRollbackComplete,
+		StackStatusDeleteInProgress,
+		StackStatusDeleteFailed,
+		StackStatusDeleteComplete,
+		StackStatusUpdateInProgress,
+		StackStatusUpdateCompleteCleanupInProgress,
+		StackStatusUpdateComplete,
+		StackStatusUpdateRollbackInProgress,
+		StackStatusUpdateRollbackFailed,
+		StackStatusUpdateRollbackCompleteCleanupInProgress,
+		StackStatusUpdateRollbackComplete,
+		StackStatusReviewInProgress,
+		StackStatusImportInProgress,
+		StackStatusImportComplete,
+		StackStatusImportRollbackInProgress,
+		StackStatusImportRollbackFailed,
+		StackStatusImportRollbackComplete,
+	}
+}
+
 const (
 	// TemplateStageOriginal is a TemplateStage enum value
 	TemplateStageOriginal = "Original"
@@ -17189,6 +18324,14 @@ const (
 	TemplateStageProcessed = "Processed"
 )
 
+// TemplateStage_Values returns all elements of the TemplateStage enum
+func TemplateStage_Values() []string {
+	return []string{
+		TemplateStageOriginal,
+		TemplateStageProcessed,
+	}
+}
+
 const (
 	// VisibilityPublic is a Visibility enum value
 	VisibilityPublic = "PUBLIC"
@@ -17196,3 +18339,11 @@ const (
 	// VisibilityPrivate is a Visibility enum value
 	VisibilityPrivate = "PRIVATE"
 )
+
+// Visibility_Values returns all elements of the Visibility enum
+func Visibility_Values() []string {
+	return []string{
+		VisibilityPublic,
+		VisibilityPrivate,
+	}
+}

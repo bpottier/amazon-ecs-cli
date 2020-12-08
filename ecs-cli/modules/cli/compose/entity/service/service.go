@@ -89,9 +89,18 @@ func (s *Service) LoadContext() error {
 	if err != nil {
 		return err
 	}
+	circuitBreakerEnable := s.Context().CLIContext.Bool(flags.DeploymentCircuitBreakerEnableFlag)
+	circuitBreakerRollback := s.Context().CLIContext.Bool(flags.DeploymentCircuitBreakerRollbackFlag)
+
+	deploymentCircuitBreaker := &ecs.DeploymentCircuitBreaker{
+		Enable:   aws.Bool(circuitBreakerEnable),
+		Rollback: aws.Bool(circuitBreakerRollback),
+	}
+
 	s.deploymentConfig = &ecs.DeploymentConfiguration{
-		MaximumPercent:        maxPercent,
-		MinimumHealthyPercent: minHealthyPercent,
+		DeploymentCircuitBreaker: deploymentCircuitBreaker,
+		MaximumPercent:           maxPercent,
+		MinimumHealthyPercent:    minHealthyPercent,
 	}
 
 	// Load Balancer

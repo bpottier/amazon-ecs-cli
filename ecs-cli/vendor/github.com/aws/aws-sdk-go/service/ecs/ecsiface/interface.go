@@ -84,6 +84,10 @@ type ECSAPI interface {
 	DeleteAttributesWithContext(aws.Context, *ecs.DeleteAttributesInput, ...request.Option) (*ecs.DeleteAttributesOutput, error)
 	DeleteAttributesRequest(*ecs.DeleteAttributesInput) (*request.Request, *ecs.DeleteAttributesOutput)
 
+	DeleteCapacityProvider(*ecs.DeleteCapacityProviderInput) (*ecs.DeleteCapacityProviderOutput, error)
+	DeleteCapacityProviderWithContext(aws.Context, *ecs.DeleteCapacityProviderInput, ...request.Option) (*ecs.DeleteCapacityProviderOutput, error)
+	DeleteCapacityProviderRequest(*ecs.DeleteCapacityProviderInput) (*request.Request, *ecs.DeleteCapacityProviderOutput)
+
 	DeleteCluster(*ecs.DeleteClusterInput) (*ecs.DeleteClusterOutput, error)
 	DeleteClusterWithContext(aws.Context, *ecs.DeleteClusterInput, ...request.Option) (*ecs.DeleteClusterOutput, error)
 	DeleteClusterRequest(*ecs.DeleteClusterInput) (*request.Request, *ecs.DeleteClusterOutput)
@@ -251,6 +255,10 @@ type ECSAPI interface {
 	UntagResource(*ecs.UntagResourceInput) (*ecs.UntagResourceOutput, error)
 	UntagResourceWithContext(aws.Context, *ecs.UntagResourceInput, ...request.Option) (*ecs.UntagResourceOutput, error)
 	UntagResourceRequest(*ecs.UntagResourceInput) (*request.Request, *ecs.UntagResourceOutput)
+
+	UpdateCapacityProvider(*ecs.UpdateCapacityProviderInput) (*ecs.UpdateCapacityProviderOutput, error)
+	UpdateCapacityProviderWithContext(aws.Context, *ecs.UpdateCapacityProviderInput, ...request.Option) (*ecs.UpdateCapacityProviderOutput, error)
+	UpdateCapacityProviderRequest(*ecs.UpdateCapacityProviderInput) (*request.Request, *ecs.UpdateCapacityProviderOutput)
 
 	UpdateClusterSettings(*ecs.UpdateClusterSettingsInput) (*ecs.UpdateClusterSettingsOutput, error)
 	UpdateClusterSettingsWithContext(aws.Context, *ecs.UpdateClusterSettingsInput, ...request.Option) (*ecs.UpdateClusterSettingsOutput, error)

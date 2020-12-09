@@ -127,9 +127,9 @@ const (
 	DeploymentMinHealthyPercentDefaultValue      = 100
 	DeploymentMinHealthyPercentFlag              = "deployment-min-healthy-percent"
 	DeploymentCircuitBreakerEnableFlag           = "deployment-circuit-breaker-enable"
-	DeploymentCircuitBreakerEnableDefaultValue   = true
+	DeploymentCircuitBreakerEnableDefaultValue   = false
 	DeploymentCircuitBreakerRollbackFlag         = "deployment-circuit-breaker-rollback"
-	DeploymentCircuitBreakerRollbackDefaultValue = true
+	DeploymentCircuitBreakerRollbackDefaultValue = false
 
 	TargetGroupArnFlag         = "target-group-arn"
 	ContainerNameFlag          = "container-name"

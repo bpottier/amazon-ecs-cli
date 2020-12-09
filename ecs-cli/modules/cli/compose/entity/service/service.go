@@ -89,12 +89,12 @@ func (s *Service) LoadContext() error {
 	if err != nil {
 		return err
 	}
-	circuitBreakerEnable := s.Context().CLIContext.Bool(flags.DeploymentCircuitBreakerEnableFlag)
-	circuitBreakerRollback := s.Context().CLIContext.Bool(flags.DeploymentCircuitBreakerRollbackFlag)
+	deploymentCircuitBreakerEnable := s.Context().CLIContext.Bool(flags.DeploymentCircuitBreakerEnableFlag)
+	deploymentCircuitBreakerRollback := s.Context().CLIContext.Bool(flags.DeploymentCircuitBreakerRollbackFlag)
 
 	deploymentCircuitBreaker := &ecs.DeploymentCircuitBreaker{
-		Enable:   aws.Bool(circuitBreakerEnable),
-		Rollback: aws.Bool(circuitBreakerRollback),
+		Enable:   aws.Bool(deploymentCircuitBreakerEnable),
+		Rollback: aws.Bool(deploymentCircuitBreakerRollback),
 	}
 
 	s.deploymentConfig = &ecs.DeploymentConfiguration{
@@ -645,6 +645,12 @@ func (s *Service) logCreateService(serviceName, taskDefName string) {
 	if s.deploymentConfig != nil && s.deploymentConfig.MinimumHealthyPercent != nil {
 		fields["deployment-min-healthy-percent"] = aws.Int64Value(s.deploymentConfig.MinimumHealthyPercent)
 	}
+	if s.deploymentConfig != nil && s.deploymentConfig.DeploymentCircuitBreaker.Enable != nil {
+		fields["deployment-circuit-breaker-enable"] = aws.BoolValue(s.deploymentConfig.DeploymentCircuitBreaker.Enable)
+	}
+	if s.deploymentConfig != nil && s.deploymentConfig.DeploymentCircuitBreaker.Rollback != nil {
+		fields["deployment-circuit-breaker-rollback"] = aws.BoolValue(s.deploymentConfig.DeploymentCircuitBreaker.Rollback)
+	}
 	if s.healthCheckGP != nil {
 		fields["health-check-grace-period"] = *s.healthCheckGP
 	}
@@ -783,6 +789,12 @@ func (s *Service) logUpdateService(input *ecs.UpdateServiceInput, message string
 	}
 	if s.deploymentConfig != nil && s.deploymentConfig.MinimumHealthyPercent != nil {
 		fields["deployment-min-healthy-percent"] = aws.Int64Value(s.deploymentConfig.MinimumHealthyPercent)
+	}
+	if s.deploymentConfig != nil && s.deploymentConfig.DeploymentCircuitBreaker.Enable != nil {
+		fields["deployment-circuit-breaker-enable"] = aws.BoolValue(s.deploymentConfig.DeploymentCircuitBreaker.Enable)
+	}
+	if s.deploymentConfig != nil && s.deploymentConfig.DeploymentCircuitBreaker.Rollback != nil {
+		fields["deployment-circuit-breaker-rollback"] = aws.BoolValue(s.deploymentConfig.DeploymentCircuitBreaker.Rollback)
 	}
 	if s.healthCheckGP != nil {
 		fields["health-check-grace-period"] = *s.healthCheckGP

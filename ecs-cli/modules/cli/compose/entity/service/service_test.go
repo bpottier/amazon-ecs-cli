@@ -53,10 +53,14 @@ const (
 func TestCreateWithDeploymentConfig(t *testing.T) {
 	deploymentMaxPercent := 200
 	deploymentMinPercent := 100
+	deploymentCircuitBreakerEnable := true
+	deploymentCircuitBreakerRollback := true
 
 	flagSet := flag.NewFlagSet("ecs-cli-up", 0)
 	flagSet.String(flags.DeploymentMaxPercentFlag, strconv.Itoa(deploymentMaxPercent), "")
 	flagSet.String(flags.DeploymentMinHealthyPercentFlag, strconv.Itoa(deploymentMinPercent), "")
+	flagSet.String(flags.deploymentCircuitBreakerEnableFlag, strconv.Bool(deploymentCircuitBreakerEnable), false)
+	flagSet.String(flags.deploymentCircuitBreakerRollbackFlag, strconv.Bool(deploymentCircuitBreakerRollback), false)
 
 	createServiceTest(
 		t,
@@ -67,6 +71,8 @@ func TestCreateWithDeploymentConfig(t *testing.T) {
 			actual := input.DeploymentConfiguration
 			assert.Equal(t, int64(deploymentMaxPercent), aws.Int64Value(actual.MaximumPercent), "DeploymentConfig.MaxPercent should match")
 			assert.Equal(t, int64(deploymentMinPercent), aws.Int64Value(actual.MinimumHealthyPercent), "DeploymentConfig.MinimumHealthyPercent should match")
+			assert.Equal(t, bool(deploymentCircuitBreakerEnable), aws.BoolValue(actual.DeploymentCircuitBreaker.Enable), "")
+			assert.Equal(t, bool(deploymentCircuitBreakerRollback), aws.BoolValue(actual.DeploymentCircuitBreaker.Rollback), "")
 		},
 		ecsSettingDisabled,
 	)
@@ -84,6 +90,8 @@ func TestCreateWithoutDeploymentConfig(t *testing.T) {
 			actual := input.DeploymentConfiguration
 			assert.Nil(t, actual.MaximumPercent, "DeploymentConfig.MaximumPercent should be nil")
 			assert.Nil(t, actual.MinimumHealthyPercent, "DeploymentConfig.MinimumHealthyPercent should be nil")
+			assert.Nil(t, actual.DeploymentCircuitBreaker.Enable, "")
+			assert.Nil(t, actual.DeploymentCircuitBreaker.Rollback, "")
 		},
 		ecsSettingDisabled,
 	)

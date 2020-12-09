@@ -121,25 +121,25 @@ const (
 	RegistryCredsFileNameFlag = "registry-creds"
 
 	// Compose Service
-	CreateServiceCommandName                		= "create"
-	DeploymentMaxPercentDefaultValue        		= 200
-	DeploymentMaxPercentFlag                		= "deployment-max-percent"
-	DeploymentMinHealthyPercentDefaultValue 		= 100
-	DeploymentMinHealthyPercentFlag         		= "deployment-min-healthy-percent"
-	DeploymentCircuitBreakerEnableFlag				= "deployment-circuit-breaker-enable"
-	DeploymentCircuitBreakerEnableDefaultValue		= false
-	DeploymentCircuitBreakerRollbackFlag			= "deployment-circuit-breaker-rollback"
-	DeploymentCircuitBreakerRollbackDefaultValue	= false
+	CreateServiceCommandName                     = "create"
+	DeploymentMaxPercentDefaultValue             = 200
+	DeploymentMaxPercentFlag                     = "deployment-max-percent"
+	DeploymentMinHealthyPercentDefaultValue      = 100
+	DeploymentMinHealthyPercentFlag              = "deployment-min-healthy-percent"
+	DeploymentCircuitBreakerEnableFlag           = "deployment-circuit-breaker-enable"
+	DeploymentCircuitBreakerEnableDefaultValue   = true
+	DeploymentCircuitBreakerRollbackFlag         = "deployment-circuit-breaker-rollback"
+	DeploymentCircuitBreakerRollbackDefaultValue = true
 
-	TargetGroupArnFlag                      = "target-group-arn"
-	ContainerNameFlag                       = "container-name"
-	ContainerPortFlag                       = "container-port"
-	LoadBalancerNameFlag                    = "load-balancer-name"
-	HealthCheckGracePeriodFlag              = "health-check-grace-period"
-	RoleFlag                                = "role"
-	ComposeServiceTimeOutFlag               = "timeout"
-	ForceDeploymentFlag                     = "force-deployment"
-	TargetGroupsFlag                        = "target-groups"
+	TargetGroupArnFlag         = "target-group-arn"
+	ContainerNameFlag          = "container-name"
+	ContainerPortFlag          = "container-port"
+	LoadBalancerNameFlag       = "load-balancer-name"
+	HealthCheckGracePeriodFlag = "health-check-grace-period"
+	RoleFlag                   = "role"
+	ComposeServiceTimeOutFlag  = "timeout"
+	ForceDeploymentFlag        = "force-deployment"
+	TargetGroupsFlag           = "target-groups"
 
 	// Registry Creds
 	UpdateExistingSecretsFlag = "update-existing-secrets"
